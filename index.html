@@ -5,285 +5,128 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
-    <!-- Google Fonts (Poppins and Roboto) -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
-    <style>
-      body {
-        background-color: #A8E6CF;
-        font-family: 'Poppins', sans-serif;
-        color: #333;
-      }
-
-      h1 {
-        font-weight: 600;
-        color: #4CAF50;
-        margin-top: 30px;
-      }
-
-      h2 {
-        font-weight: 400;
-        color: #E91E63;
-      }
-
-      .btn {
-        border-radius: 50px;
-        padding: 15px 30px;
-        font-size: 18px;
-        font-weight: 500;
-      }
-
-      .btn-success {
-        background-color: #4CAF50;
-        border: none;
-        color: white;
-      }
-
-      .btn-danger {
-        background-color: #FF7043;
-        border: none;
-        color: white;
-      }
-
-      .modal-content {
-        background-color: #ffffff;
-        border-radius: 20px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      }
-
-      .modal-body {
-        font-size: 18px;
-        color: #555;
-        text-align: center;
-      }
-
-      .modal-title {
-        font-weight: 600;
-        color: #4CAF50;
-      }
-
-      #demo {
-        margin-top: 20px;
-        font-size: 16px;
-        color: #888;
-      }
-
-      .footer {
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-        padding: 10px;
-        text-align: center;
-        font-size: 14px;
-        background-color: #4CAF50;
-        color: white;
-      }
-
-      .card {
-        border-radius: 10px;
-        padding: 20px;
-        background-color: #ffffff;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        margin: 10px;
-      }
-
-      .logo {
-        max-width: 150px;
-        margin-bottom: 20px;
-      }
-
-      .pdpa-section {
-        margin-top: 20px;
-      }
-    </style>
-
-    <title>MK Time Ticker</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <title>PL Time Ticker</title>
   </head>
   <body>
-    <div class="container text-center">
-      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTytwug670ZT-11TYlXrUSICFqRsBv5_WCqmQ&s" alt="Logo" class="logo">
-
+    <center>
       <h1>บันทึกเวลาการทำของพนักงานขับรถประจำคลังพิษณุโลก</h1>
-      <p>กดปุ่มด้านล่าง เพื่อบันทึกการลงเข้า </p>
+      <p>กดปุ่มด้านล่าง เพื่อบันทึกการลงเข้า</p>
+      <button class="btn btn-success" onclick="getLocation('In')">Check-In</button>
+      <p>กดปุ่ม เพื่อบันทึกเวลาออก</p>
+      <button class="btn btn-danger" onclick="getLocation('Out')">Check-Out</button>
+      <h2 style="color:red;">เมื่อเลิกงานแล้วอย่าลืม Check Out เพื่อสิทธิประโยชน์ของผู้ทำงานเอง</h2>
 
-      <div id="cin" class="visible card">
-        <button type="button" class="btn btn-success" onclick="getLocation()">Check-In</button>
+      <!-- ข้อมูลโปรไฟล์ -->
+      <div id="profile" style="margin-top: 20px;">
+        <h3>ข้อมูลผู้ใช้</h3>
+        <img id="profilePicture" src="" alt="Profile Picture" width="100" style="border-radius: 50%; display: none;">
+        <p id="displayName"></p>
+        <p id="userId"></p>
       </div>
 
-      <p>กดปุ่ม เพื่อบันทึกเวลาออก </p>
-      <div id="cout" class="visible card">
-        <button type="button" class="btn btn-danger" onclick="getLocationOut()">Check-Out</button>
+      <!-- Spinner สำหรับการโหลด -->
+      <div id="loadingSpinner" class="spinner-border text-primary" style="display: none;" role="status">
+        <span class="sr-only">Loading...</span>
       </div>
+    </center>
 
-      <h2><font color="red">เมื่อเลิกงานแล้วอย่าลืม Check-Out เพื่อสิทธิประโยชน์ของผู้ทำงานเอง</font></h2>
-      <p id="demo"></p>
-
-      <!-- PDPA Section -->
- <div class="pdpa-section">
-  <input type="checkbox" id="pdpaConsent" checked /> 
-  <label for="pdpaConsent">ฉันขออนุญาตให้เก็บข้อมูลตามข้อกำหนด PDPA</label>
-  <br>
-  <a href="https://patriackwong.github.io/PTGMKDEPOTPDPA/" target="_blank">รายละเอียดนโยบายความเป็นส่วนตัว (Privacy Notice)</a>
-</div>
-
-
-      <!-- Modal for loading status -->
-      <div class="modal" tabindex="-1" role="dialog" id="loadingModal">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">กำลังบันทึกข้อมูล</h5>
-            </div>
-            <div class="modal-body">
-              <p>โปรดรอสักครู่...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
+    <!-- LIFF SDK -->
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <script>
-      window.onload = function() {
-        initializeLiff('1660796030-p52mKalN');
-      }
+      const xurl = "https://script.google.com/macros/s/AKfycbxWQaosFQWJihihsTsd0yyxnbzAsJ8KLEeqg7yxOq8FDz_V7CojFz7MECbsg8uvxqTOnw/exec";
 
-      const xurl = "https://script.google.com/macros/s/AKfycbyD8kN9xteg87TbSTqoE8jIOuDsw94b4H1otizZPF5r9GvTOCCogAjLi92J9uCRX6NUPg/exec";
+      // เริ่มต้น LIFF
+      window.onload = async () => {
+        try {
+          await liff.init({ liffId: '2006136313-6GEZ4b0D' });
+          const profile = await liff.getProfile();
+          displayProfile(profile);
+        } catch (err) {
+          console.error('LIFF Initialization failed', err);
+        }
+      };
 
-      function initializeLiff(myLiffId) {
-        liff
-          .init({
-            liffId: myLiffId
-          })
-          .then(() => {
-            console.log('LIFF Initialized successfully');
-          })
-          .catch((err) => {
-            console.error('LIFF Initialization failed', err);
-          });
-      }
-
-      var x = document.getElementById("demo");
-
-      function showLoading() {
-        $('#loadingModal').modal({
-          backdrop: 'static',
-          keyboard: false
-        });
-        $('#loadingModal').modal('show');
-      }
-
-      function hideLoading() {
-        $('#loadingModal').modal('hide');
-      }
-
-      function getLocation() {
-        if (document.getElementById('pdpaConsent').checked) {
-          if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(showPosition, handleError);
-          } else {
-            x.innerHTML = "Geolocation is not supported by this browser.";
-          }
-        } else {
-          alert("กรุณายอมรับเงื่อนไข PDPA ก่อน");
+      function displayProfile(profile) {
+        document.getElementById("displayName").innerText = `👤 ชื่อผู้ใช้: ${profile.displayName}`;
+        document.getElementById("userId").innerText = `🔑 User ID: ${profile.userId}`;
+        if (profile.pictureUrl) {
+          const profilePicture = document.getElementById("profilePicture");
+          profilePicture.src = profile.pictureUrl;
+          profilePicture.style.display = "block";
         }
       }
 
-      function showPosition(position) {
-        showLoading();
+      async function getLocation(type) {
+        // แสดง spinner ขณะรอข้อมูล
+        document.getElementById('loadingSpinner').style.display = 'inline-block';
 
-        liff.getProfile().then(function(profile) {
-          var uid = profile.userId;
-          var uname = profile.displayName;
-          var xos = liff.getOS();
-          x.innerHTML = "Lat: " + position.coords.latitude +
-            "<br>Long: " + position.coords.longitude +
-            "<br>userId: " + uid +
-            "<br>displayName: " + uname +
-            "<br>your OS: " + xos;
-
-          var xmlhttp = new XMLHttpRequest();
-          var theUrl = xurl + "?ctype=In&xos=" + xos + "&user=" + uid + "&name=" + uname + "&lat=" + position.coords.latitude + "&long=" + position.coords.longitude;
-          xmlhttp.open('GET', theUrl);
-          xmlhttp.send();
-
-          xmlhttp.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-              var jsonResponse = JSON.parse(this.responseText);
-              alert(jsonResponse.desc);
-
-              hideLoading();
-              liff.closeWindow();
-            } else if (this.readyState == 4) {
-              alert('Error: ' + this.status + ' - ' + this.statusText);
-              hideLoading();
-            }
-          };
-        }).catch((err) => {
-          console.error("Error fetching LIFF profile:", err);
-          hideLoading();
-        });
-      }
-
-      function handleError(error) {
-        console.error("Error fetching geolocation:", error);
-        x.innerHTML = "Error: " + error.message;
-        hideLoading();
-      }
-
-      function getLocationOut() {
-        if (document.getElementById('pdpaConsent').checked) {
-          if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(showPositionOut, handleError);
-          } else {
-            x.innerHTML = "Geolocation is not supported by this browser.";
-          }
-        } else {
-          alert("กรุณายอมรับเงื่อนไข PDPA ก่อน");
+        if (!navigator.geolocation) {
+          Swal.fire('❌ Error', 'Geolocation ไม่รองรับบนเบราว์เซอร์นี้', 'error');
+          // ซ่อน spinner หากเกิดข้อผิดพลาด
+          document.getElementById('loadingSpinner').style.display = 'none';
+          return;
         }
+
+        navigator.geolocation.getCurrentPosition(async (position) => {
+          const { latitude, longitude } = position.coords;
+          try {
+            const profile = await liff.getProfile();
+            const xos = liff.getOS();
+            const response = await fetch(`${xurl}?ctype=${type}&xos=${xos}&name=${profile.displayName}&userId=${profile.userId}&lat=${latitude}&long=${longitude}`);
+            const jsonResponse = await response.json();
+
+            const isError = jsonResponse.desc.includes("เกิน");
+            await showAlertAndSendMessage(type, jsonResponse.desc, isError);
+          } catch (err) {
+            console.error('Error:', err);
+            Swal.fire('❌ Error', 'ไม่สามารถดึงข้อมูลหรือบันทึกข้อมูลได้', 'error');
+          } finally {
+            // ซ่อน spinner เมื่อได้รับการตอบกลับ
+            document.getElementById('loadingSpinner').style.display = 'none';
+          }
+        });
       }
 
-      function showPositionOut(position) {
-        showLoading();
+      // ฟังก์ชันสำหรับแสดง SweetAlert และส่ง Flex Message
+      async function showAlertAndSendMessage(type, message, isError) {
+        const currentDate = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
 
-        liff.getProfile().then(function(profile) {
-          var uid = profile.userId;
-          var uname = profile.displayName;
-          var xos = liff.getOS();
-          x.innerHTML = "Lat: " + position.coords.latitude +
-            "<br>Long: " + position.coords.longitude +
-            "<br>userId: " + uid +
-            "<br>displayName: " + uname +
-            "<br>your OS: " + xos;
-
-          var xmlhttp = new XMLHttpRequest();
-          var theUrl = xurl + "?ctype=Out&xos=" + xos + "&user=" + uid + "&name=" + uname + "&lat=" + position.coords.latitude + "&long=" + position.coords.longitude;
-          xmlhttp.open('GET', theUrl);
-          xmlhttp.send();
-
-          xmlhttp.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-              var jsonResponse = JSON.parse(this.responseText);
-              alert(jsonResponse.desc);
-
-              hideLoading();
-              liff.closeWindow();
-            } else if (this.readyState == 4) {
-              alert('Error: ' + this.status + ' - ' + this.statusText);
-              hideLoading();
-            }
-          };
-        }).catch((err) => {
-          console.error("Error fetching LIFF profile:", err);
-          hideLoading();
+        await Swal.fire({
+          title: isError ? '❌ การดำเนินการไม่สำเร็จ' : '✅ ดำเนินการสำเร็จ',
+          text: message,
+          icon: isError ? 'error' : 'success',
+          confirmButtonText: 'ตกลง'
         });
+
+        const altText = isError ? 'ไม่สามารถบันทึกข้อมูลได้' : `${type === 'In' ? 'บันทึกเวลาเข้า' : 'บันทึกเวลาออก'}สำเร็จ`;
+
+        await liff.sendMessages([{
+          type: 'flex',
+          altText: altText,
+          contents: {
+            type: 'bubble',
+            size: 'mega',
+            header: {
+              type: 'box',
+              layout: 'horizontal',
+              contents: [{ type: 'text', text: altText, weight: 'bold', size: 'xl', color: '#ffffff' }],
+              backgroundColor: isError ? '#dc3545' : '#28a745'
+            },
+            body: {
+              type: 'box',
+              layout: 'vertical',
+              contents: [
+                { type: 'text', text: message, color: '#333333', size: 'md', wrap: true },
+                { type: 'text', text: `📅 วันที่: ${currentDate}`, color: '#666666', size: 'sm', margin: 'md' }
+              ]
+            }
+          }
+        }]);
+
+        liff.closeWindow();
       }
     </script>
-
-    <!-- Optional JavaScript -->
-    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" crossorigin="anonymous"></script>
   </body>
 </html>
